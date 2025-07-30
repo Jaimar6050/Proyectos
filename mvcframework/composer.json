@@ -1,0 +1,19 @@
+{
+    "name": "usrweb/mvcframework",
+    "description": "Mi primer framework",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ariel Mamani"
+        }
+    ],
+    "require": {
+        "nette/database": "^3.2"
+    }
+}

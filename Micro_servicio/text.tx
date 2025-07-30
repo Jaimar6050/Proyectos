@@ -1,0 +1,103 @@
+from flask import Flask, jsonify, request
+from flask_mysqldb import MySQL
+from config import config
+
+app = Flask(__name__)
+app.config.from_object(config['development'])
+CORS(app, resources={r"/*": {"origins": "http://localhost"}})
+conexion=MySQL(app)
+
+@app.route('/libros', methods=['GET'])
+def selectAllLibros():
+    try:
+        db = conexion.connect.cursor()
+        sql = "SELECT id, nombre,titulo, autor, editorial, descripcion FROM libros"
+        db_conn.execute(sql)
+        recset = db_conn.fetchall()
+        libros = []
+        for fila in recset:
+            libro = {'id':fila[0],'titulo':fila[1],'autor':fila[2],'editorial':fila[3],'descripcion':fila[4]}
+            libros.append(libro)
+            return jsonify({'libros': libros, 'message': "Peticion completada.", 'exito':True})
+    except Exception as ex:
+        return jsonify({'message': "Error: ", 'exito':False})
+
+def getLibro(id)
+    try:
+        db = conexion.connect.cursor()
+        sql = "SELECT titulo, autor, editorial, descripcion FROM libros WHERE id = '{0}'".format(id)
+        db_conn.execute(sql)
+        rs= db_conn.fetchone()
+        if rs != None:
+            libro = {'id':id, 'titulo'=rs[0],'autor':rs[1],'editorial':rs[2],'descripcion':rs[3]}
+            return libro
+        else:
+            return None
+    except Exception as ex:
+        raise ex
+
+@app.route('/libros/<id>', methods=['GET'])
+def selectLibro(id):
+    try:
+        libro = getLibro(id)
+        if libro != None:
+            return jsonify({'libro': libro, 'message': "Peticion completada.", 'exito':True})
+        else:
+            return jsonify({'message': "Libro no encontrado.", 'exito':False})
+    except Exception as ex:
+        return jsonify({'message': "Error: ", 'exito':False})
+
+@app.route('/libros', methods=['POST'])
+def insertLibro():
+    if request.headers.get('Content-Type') != 'application/x-www-form-urlencoded':
+    try:
+        titulo = request.form.get['titulo']
+        autor = request.form.get['autor']
+        editorial = request.form.get['editorial']
+        descripcion = request.form.get['descripcion']
+        sql = """INSERT INTO libros (titulo, autor, editorial, descripcion) VALUES ('{0}', '{1}', '{2}', '{3}')""".format(titulo, autor, editorial, descripcion)
+        db_conn.execute(sql)
+        conexion.connection.commit()
+        return jsonify({'message': "Libro insertado.", 'exito':True})
+    except Exception as ex:
+        print(ex)
+        return jsonify({'message': "Error: ", 'exito':False})
+
+@app.route('/libros/<id>', methods=['PUT'])
+def updateLibro(id):
+    libro = getLibro(id)
+    if libro != None:
+        if request.headers.get('Content-Type') != 'application/x-www-form-urlencoded':
+            try:
+                titulo = request.form.get['titulo']
+                autor = request.form.get['autor']
+                editorial = request.form.get['editorial']
+                descripcion = request.form.get['descripcion']
+                sql = """UPDATE libros SET titulo = '{0}', autor = '{1}', editorial = '{2}', descripcion = '{3}' WHERE id = '{4}'""".format(titulo, autor, editorial, descripcion, id)
+                db_conn.execute(sql)
+                conexion.connection.commit()
+                return jsonify({'message': "Libro actualizado.", 'exito':True})
+            except Exception as ex:
+                print(ex)
+                return jsonify({'message': "Error: ", 'exito':False})
+    else:
+        return jsonify({'message': "libro no encontrado.", 'exito':False})
+
+@app.route('/libros/<id>', methods=['DELETE'])
+def deleteLibro(id):
+    try:
+        libro = getLibro(id)
+        if libro != None:
+            db = conexion.connect.cursor()
+            sql = "DELETE FROM libros WHERE id = '{0}'".format(id)
+            db_conn.execute(sql)
+            conexion.connection.commit()
+            return jsonify({'message': "Libro eliminado.", 'exito':True})
+        else:
+            return jsonify({'message': "Libro no encontrado.", 'exito':False})
+    except Exception as ex:
+        return jsonify({'message': "Error: ", 'exito':False})
+def pagina_no_encontrada(error):
+    return "<p>Página no encontrada</p>", 404
+app.register_error_handler(404, pagina_no_encontrada)
+    
